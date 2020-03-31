@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const port = process.env.PORT || 5000;
 const mongoose = require('mongoose')
 //const ObjectId = require('mongodb').ObjectId   -- just in case we need it
+mongoose.connect('mongodb://localhost/new_database', {useNewUrlParser: true, useUnifiedTopology: true})
 
 //defines our new database
 const newDataBase = mongoose.connection;
@@ -25,22 +26,33 @@ app.get('/getitems', getItems)
 //handle delete request
 app.post('/deleteitem', deleteItem)
 
+const toDoSchema = new mongoose.Schema({
+    content: String
+})
+
+const ToDo = mongoose.model('ToDo', toDoSchema)
+
 async function postItem(req, res) {
-
-    //write this function
-
+    let content = req.body.content
+    
+    let newToDo = ToDo({
+        content: content
+    })
+    await newToDo.save()
+    let items = await ToDo.find({})
+    res.type('application/json').send(JSON.stringify(items))
 }
 
 async function getItems(req, res) {
-
-    //write this function
-
+    let items = await ToDo.find({})
+    res.type('application/json').send(JSON.stringify(items))
 }
 
 async function deleteItem(req, res) {
-
-    //write this function
-    
+    let id = req.body.id
+    await ToDo.deleteOne( { _id : id } );
+    let items = await ToDo.find({})
+    res.type('application/json').send(JSON.stringify(items))
 }
 
 //serves our single page app
